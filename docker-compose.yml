@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: eraflazz-postgres
+    environment:
+      POSTGRES_DB: eraflazz_db
+      POSTGRES_USER: eraflazz_user
+      POSTGRES_PASSWORD: eraflazz_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - eraflazz-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: eraflazz-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - eraflazz-network
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eraflazz-api
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: eraflazz_db
+      DB_USER: eraflazz_user
+      DB_PASSWORD: eraflazz_password
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      APP_ENV: development
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - eraflazz-network
+    volumes:
+      - .:/app
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  eraflazz-network:
+    driver: bridge

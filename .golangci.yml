@@ -1,0 +1,201 @@
+run:
+  timeout: 5m
+  issues-exit-code: 1
+  tests: true
+  skip-dirs:
+    - vendor
+    - web
+  skip-files:
+    - ".*\\.pb\\.go$"
+    - ".*_generated\\.go$"
+
+output:
+  format: colored-line-number
+  print-issued-lines: true
+  print-linter-name: true
+  uniq-by-line: true
+  sort-results: true
+
+linters-settings:
+  govet:
+    check-shadowing: true
+    enable-all: true
+    disable:
+      - fieldalignment # too strict
+      - shadow
+
+  gocyclo:
+    min-complexity: 15
+
+  maligned:
+    suggest-new: true
+
+  dupl:
+    threshold: 100
+
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+
+  misspell:
+    locale: US
+
+  lll:
+    line-length: 120
+
+  goimports:
+    local-prefixes: github.com/alfanzaky/eraflazz
+
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - dupImport # https://github.com/go-critic/go-critic/issues/845
+      - ifElseChain
+      - octalLiteral
+      - whyNoLint
+      - wrapperFunc
+
+  funlen:
+    lines: 100
+    statements: 50
+
+  gocognit:
+    min-complexity: 20
+
+  nestif:
+    min-complexity: 4
+
+  gomnd:
+    settings:
+      mnd:
+        checks: argument,case,condition,operation,return,assign
+        ignored-numbers:
+          - "0"
+          - "1"
+          - "2"
+          - "3"
+          - "4"
+          - "5"
+          - "6"
+          - "7"
+          - "8"
+          - "9"
+          - "10"
+          - "100"
+          - "1000"
+
+  gomodguard:
+    allowed:
+      - gopkg.in/yaml.v2
+    blocked:
+      - modules:
+          - github.com/pkg/errors
+        recommendations:
+          - github.com/alfanzaky/eraflazz/pkg/errors
+
+  godot:
+    scope: top-level
+    exclude:
+      - "TODO"
+      - "FIXME"
+    capital: true
+
+  testpackage:
+    regex: ^test
+    prefix: test_
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - deadcode
+    - depguard
+    - dogsled
+    - dupl
+    - errcheck
+    - exportloopref
+    - exhaustive
+    - funlen
+    - gochecknoinits
+    - goconst
+    - gocritic
+    - gocyclo
+    - gofmt
+    - goimports
+    - golint
+    - gomnd
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - ineffassign
+    - interfacer
+    - lll
+    - misspell
+    - nakedret
+    - noctx
+    - nolintlint
+    - rowserrcheck
+    - scopelint
+    - staticcheck
+    - structcheck
+    - stylecheck
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+    - whitespace
+    - gocognit
+    - nestif
+    - prealloc
+    - godot
+    - testpackage
+
+issues:
+  exclude-rules:
+    # Exclude some linters from running on tests files
+    - path: _test\.go
+      linters:
+        - gocyclo
+        - errcheck
+        - dupl
+        - gosec
+        - lll
+        - gomnd
+        - funlen
+
+    # Exclude known linter issues
+    - text: "weak cryptographic primitive"
+      linters:
+        - gosec
+
+    # Exclude shadow checking on err variables
+    - text: "shadow: declaration of \"err\""
+      linters:
+        - govet
+
+    # Exclude SA4006 on context.WithValue
+    - text: "SA4006: this value of `.*` is never used"
+      linters:
+        - staticcheck
+
+    # Exclude magic number warnings for common values
+    - text: "Magic number: [0-9]+"
+      linters:
+        - gomnd
+
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  new: false
+
+severity:
+  default-severity: error
+  case-sensitive: false
