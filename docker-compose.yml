@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: eraflazz_db
       POSTGRES_USER: eraflazz_user
-      POSTGRES_PASSWORD: eraflazz_password
+      POSTGRES_PASSWORD: wEduS234@
     ports:
       - "5432:5432"
     volumes:
@@ -38,7 +38,7 @@ services:
       DB_PORT: 5432
       DB_NAME: eraflazz_db
       DB_USER: eraflazz_user
-      DB_PASSWORD: eraflazz_password
+      DB_PASSWORD: wEduS234@
       REDIS_HOST: redis
       REDIS_PORT: 6379
       APP_ENV: development
@@ -50,9 +50,26 @@ services:
     volumes:
       - .:/app
 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: eraflazz-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@eraflazz.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5051:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - eraflazz-network
+    depends_on:
+      - postgres
+
 volumes:
   postgres_data:
   redis_data:
+  pgadmin_data:
 
 networks:
   eraflazz-network:

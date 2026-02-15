@@ -112,10 +112,6 @@ func main() {
 		queueRepo,
 	)
 
-	// Initialize handlers
-	transactionHandler := apihandler.NewTransactionHandler(transactionUC)
-	productHandler := apihandler.NewProductHandler(productUC)
-
 	// Start background transaction worker
 	transactionWorker := worker.NewTransactionWorker(queueRepo, transactionUC, worker.TransactionWorkerConfig{})
 	workerCtx, workerCancel := context.WithCancel(context.Background())
@@ -131,6 +127,11 @@ func main() {
 
 	// Initialize auth service
 	authService := auth.NewJWTAuthService(cfg.Auth)
+
+	// Initialize handlers
+	transactionHandler := apihandler.NewTransactionHandler(transactionUC)
+	productHandler := apihandler.NewProductHandler(productUC)
+	authHandler := apihandler.NewAuthHandler(userRepo, authService)
 
 	// Initialize metrics handler
 	metricsHandler := observability.NewMetricsHandler()
@@ -151,7 +152,7 @@ func main() {
 	router.GET("/live", metricsHandler.LivenessEndpoint())
 
 	// Setup API routes
-	apihandler.SetupRoutes(router, transactionHandler, productHandler, authService, apiClientRepo)
+	apihandler.SetupRoutes(router, transactionHandler, productHandler, authHandler, authService, apiClientRepo)
 
 	// Create HTTP server
 	server := &http.Server{

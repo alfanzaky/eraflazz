@@ -18,24 +18,20 @@ import (
 )
 
 // SetupRoutes configures all API routes
+
 func SetupRoutes(
 	router *gin.Engine,
 	transactionHandler *TransactionHandler,
 	productHandler *ProductHandler,
+	authHandler *AuthHandler,
 	authService domain.AuthService,
 	clientRepo *postgres.APIClientRepository,
 ) {
-	router.GET("/health", func(c *gin.Context) {
-		xresponse.Success(c, "Service is healthy", gin.H{
-			"service": "eraflazz-api",
-			"status":  "ok",
-		})
-	})
-
 	v1 := router.Group("/api/v1")
 	{
 		configureTransactionRoutes(v1, transactionHandler, authService)
 		configureAdminProductRoutes(v1, productHandler, authService)
+		configureAuthRoutes(v1, authHandler)
 		configureH2HRoutes(v1, clientRepo)
 		configurePublicRoutes(v1)
 	}
@@ -143,6 +139,14 @@ func h2hMiddleware(authService domain.AuthService, allowedIPs []string) gin.Hand
 		)
 
 		c.Next()
+	}
+}
+
+func configureAuthRoutes(group *gin.RouterGroup, authHandler *AuthHandler) {
+	authRoutes := group.Group("/auth")
+	{
+		authRoutes.POST("/register", authHandler.Register)
+		authRoutes.POST("/login", authHandler.Login)
 	}
 }
 
